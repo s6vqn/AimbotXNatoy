@@ -39,7 +39,6 @@ local function canSeeTarget(targetPos)
     local hit = workspace:FindPartOnRayWithIgnoreList(ray, {LocalPlayer.Character}, true, false)
     
     if hit then
-        -- Check if hit is the target
         local hitModel = hit.Parent
         for i = 1, 5 do
             if hitModel and hitModel:FindFirstChildOfClass("Humanoid") then
@@ -55,14 +54,22 @@ local function canSeeTarget(targetPos)
     return true
 end
 
--- Get any part
-local function getAimedPart()
+-- Get Torso or Head only
+local function getTorsoOrHead()
     local target = Mouse.Target
     
     if target then
+        local model = target.Parent
         for i = 1, 10 do
-            if target and target:FindFirstChildOfClass("Humanoid") then
-                return target
+            if model and model:FindFirstChildOfClass("Humanoid") then
+                local torso = model:FindFirstChild("Torso") or model:FindFirstChild("UpperTorso")
+                local head = model:FindFirstChild("Head")
+                
+                if target == head then
+                    return head
+                elseif target == torso or target.Name == "Torso" or target.Name == "UpperTorso" then
+                    return torso
+                end
             end
             if target then
                 target = target.Parent
@@ -83,11 +90,10 @@ local function getClosestTarget()
             local character = player.Character
             local humanoid = character:FindFirstChild("Humanoid")
             if humanoid and humanoid.Health > 0 then
-                local aimedPart = getAimedPart()
+                local aimedPart = getTorsoOrHead()
                 if aimedPart and aimedPart:IsDescendantOf(character) then
                     local targetPos = aimedPart.Position
                     
-                    -- Wall check - only aim if can see target
                     if not canSeeTarget(targetPos) then
                         continue
                     end
@@ -132,4 +138,5 @@ end)
 print("Aimbot Loaded!")
 print("Press T to toggle")
 print("Hold RIGHT CLICK to aim")
-print("- Wall check added (won't aim through walls)")
+print("- Aims at Torso or Head only")
+print("- Wall check")
